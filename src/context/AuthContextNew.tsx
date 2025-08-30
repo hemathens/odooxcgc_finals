@@ -9,16 +9,10 @@ export interface User {
   email: string;
   role: UserRole;
   avatar_url?: string;
-  provider: string;
+  provider?: 'local' | 'google';
   company_name?: string;
   is_active: boolean;
   created_at: string;
-}
-
-interface AuthResponse {
-  access_token: string;
-  token_type: string;
-  user: User;
 }
 
 interface AuthContextType {
@@ -52,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token) {
         try {
           const userData = await apiClient.getCurrentUser();
-          setUser(userData as User);
+          setUser(userData);
         } catch (error) {
           // Token is invalid, clear it
           localStorage.removeItem('access_token');
@@ -119,17 +113,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(response.user);
       
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration failed:', error);
-      console.error('Error details:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-        error
-      });
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Registration failed' 
-      };
+      return { success: false, error: error.message || 'Registration failed' };
     }
   };
 
