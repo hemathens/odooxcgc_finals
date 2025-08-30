@@ -21,98 +21,29 @@ import {
   Award
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-interface Application {
-  id: string;
-  company: string;
-  position: string;
-  status: 'applied' | 'in-review' | 'interview' | 'selected' | 'rejected';
-  appliedDate: string;
-  deadline?: string;
-}
-
-interface Test {
-  id: string;
-  company: string;
-  type: string;
-  date: string;
-  time: string;
-  status: 'scheduled' | 'completed' | 'missed';
-}
+import { useApplications } from "@/context/ApplicationsContext";
+import { useTests } from "@/context/TestsContext";
+import { useNotifications } from "@/context/NotificationContext";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [upcomingTests, setUpcomingTests] = useState<Test[]>([]);
-  const [notifications, setNotifications] = useState<string[]>([]);
+  const { applications } = useApplications();
+  const { tests } = useTests();
+  const { notifications: notificationsData } = useNotifications();
   const [isLoading, setIsLoading] = useState(true);
   const [profileCompletion, setProfileCompletion] = useState(0);
 
   useEffect(() => {
-    // Simulate API loading
+    // Simulate initial loading experience
     const loadDashboardData = async () => {
       setIsLoading(true);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mock data - in real app this would come from API
-      setApplications([
-        {
-          id: '1',
-          company: 'Tech Corp',
-          position: 'Software Engineer',
-          status: 'in-review',
-          appliedDate: '2024-08-25',
-          deadline: '2024-09-01'
-        },
-        {
-          id: '2',
-          company: 'StartupXYZ',
-          position: 'Frontend Developer',
-          status: 'interview',
-          appliedDate: '2024-08-20',
-        },
-        {
-          id: '3',
-          company: 'BigTech Inc',
-          position: 'Full Stack Developer',
-          status: 'applied',
-          appliedDate: '2024-08-28',
-          deadline: '2024-09-05'
-        }
-      ]);
-
-      setUpcomingTests([
-        {
-          id: '1',
-          company: 'Tech Corp',
-          type: 'Technical Assessment',
-          date: '2024-09-02',
-          time: '10:00 AM',
-          status: 'scheduled'
-        },
-        {
-          id: '2',
-          company: 'StartupXYZ',
-          type: 'Coding Challenge',
-          date: '2024-09-03',
-          time: '2:00 PM',
-          status: 'scheduled'
-        }
-      ]);
-
-      setNotifications([
-        'Resume review scheduled for tomorrow',
-        'New job opening at Microsoft',
-        'Interview confirmed with Tech Corp'
-      ]);
+      await new Promise(resolve => setTimeout(resolve, 800));
 
       setProfileCompletion(75);
       setIsLoading(false);
       
-      // Show welcome toast
+      // Welcome toast
       toast({
         title: "Welcome back!",
         description: "Your dashboard has been updated with the latest information.",
@@ -174,7 +105,7 @@ const StudentDashboard = () => {
           />
           <StatCard
             title="Upcoming Tests"
-            value={upcomingTests.length}
+            value={tests.filter(t => t.status === 'scheduled' && new Date(t.date) >= new Date()).length}
             icon={<Calendar className="w-6 h-6 text-blue-400" />}
             trend={{ value: -5, label: "vs last month" }}
             delay={200}
@@ -283,7 +214,10 @@ const StudentDashboard = () => {
               </Button>
             </div>
             <div className="space-y-3">
-              {upcomingTests.map((test) => (
+              {tests
+                .filter(t => t.status === 'scheduled' && new Date(t.date) >= new Date())
+                .slice(0, 5)
+                .map((test) => (
                 <div key={test.id} className="bg-purple-medium/30 p-4 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-semibold text-white">{test.company}</h4>
@@ -332,10 +266,13 @@ const StudentDashboard = () => {
         <Card className="glass-card p-6">
           <h3 className="text-xl font-semibold text-white mb-4">Recent Notifications</h3>
           <div className="space-y-3">
-            {notifications.map((notification, index) => (
-              <div key={index} className="flex items-center gap-3 p-3 bg-purple-medium/30 rounded-lg">
+            {notificationsData.slice(0, 3).map((notification) => (
+              <div key={notification.id} className="flex items-center gap-3 p-3 bg-purple-medium/30 rounded-lg">
                 <AlertCircle className="w-5 h-5 text-lime flex-shrink-0" />
-                <span className="text-white">{notification}</span>
+                <div className="flex flex-col">
+                  <span className="text-white font-semibold">{notification.title}</span>
+                  <span className="text-sm text-muted-foreground">{notification.message}</span>
+                </div>
               </div>
             ))}
           </div>

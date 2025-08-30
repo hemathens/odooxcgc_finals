@@ -24,7 +24,7 @@ const TestScheduler = () => {
   const navigate = useNavigate();
   const { tests, toggleReminder: toggleReminderCtx, markTestCompleted: markTestCompletedCtx } = useTests();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<string>("");
 
 
   const getStatusColor = (status: string) => {
@@ -74,24 +74,24 @@ const toggleReminder = (testId: string) => {
     });
   };
 
+  const byDateTime = (t: { date: string; time: string }) => new Date(`${t.date}T${t.time || '00:00'}`);
+
   const filteredTests = tests.filter(test => {
     const matchesSearch = test.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          test.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          test.type.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
+    const matchesDate = !selectedDate || test.date === selectedDate;
+    return matchesSearch && matchesDate;
   });
 
-  const upcomingTests = filteredTests.filter(test => {
-    const testDate = new Date(test.date);
-    const today = new Date();
-    return test.status === 'scheduled' && testDate >= today;
-  });
+  const now = new Date();
+  const upcomingTests = filteredTests
+    .filter(test => test.status === 'scheduled' && byDateTime(test) >= now)
+    .sort((a, b) => byDateTime(a).getTime() - byDateTime(b).getTime());
 
-  const pastTests = filteredTests.filter(test => {
-    const testDate = new Date(test.date);
-    const today = new Date();
-    return test.status !== 'scheduled' || testDate < today;
-  });
+  const pastTests = filteredTests
+    .filter(test => test.status !== 'scheduled' || byDateTime(test) < now)
+    .sort((a, b) => byDateTime(b).getTime() - byDateTime(a).getTime());
 
   const statusCounts = tests.reduce((acc, test) => {
     acc[test.status] = (acc[test.status] || 0) + 1;

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { TestsProvider } from "@/context/TestsContext";
+import { ApplicationsProvider } from "@/context/ApplicationsContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import StudentDashboard from "./pages/StudentDashboard";
@@ -27,6 +28,7 @@ import Settings from "./pages/Settings";
 import Notifications from "./pages/Notifications";
 import CreateTest from "./pages/CreateTest";
 import NotFound from "./pages/NotFound";
+import { ResumeProvider } from "@/context/ResumeContext";
 
 const queryClient = new QueryClient();
 
@@ -35,10 +37,12 @@ const App = () => (
     <AuthProvider>
       <NotificationProvider>
         <TestsProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+          <ApplicationsProvider>
+            <ResumeProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
@@ -73,7 +77,9 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-            </TooltipProvider>
+                </TooltipProvider>
+              </ResumeProvider>
+            </ApplicationsProvider>
           </TestsProvider>
         </NotificationProvider>
       </AuthProvider>
