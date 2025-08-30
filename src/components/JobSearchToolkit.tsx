@@ -55,7 +55,7 @@ const JobSearchToolkit = () => {
 
         <div className="space-y-6">
           <h3 className="text-2xl font-bold text-center mb-8">
-            Everything students wished Handshake did, Prentus does
+            Everything students wished Handshake did, Placement Tracker does
           </h3>
           
           <div className="grid md:grid-cols-2 gap-6">

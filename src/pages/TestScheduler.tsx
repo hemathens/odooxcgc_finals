@@ -10,104 +10,22 @@ import {
   Plus, 
   Search,
   Edit,
-  Trash2,
   Bell,
   CheckCircle,
   AlertCircle,
   CalendarX
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface Test {
-  id: string;
-  company: string;
-  position: string;
-  type: 'aptitude' | 'technical' | 'coding' | 'interview' | 'group-discussion';
-  date: string;
-  time: string;
-  duration: number; // in minutes
-  location: string;
-  meetingLink?: string;
-  status: 'scheduled' | 'completed' | 'missed' | 'cancelled';
-  instructions?: string;
-  reminderSet: boolean;
-}
+import { useNavigate } from "react-router-dom";
+import { useTests } from "@/context/TestsContext";
 
 const TestScheduler = () => {
   const { toast } = useToast();
-  const [tests, setTests] = useState<Test[]>([]);
+  const navigate = useNavigate();
+  const { tests, toggleReminder: toggleReminderCtx, markTestCompleted: markTestCompletedCtx } = useTests();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
-  useEffect(() => {
-    // Mock data
-    setTests([
-      {
-        id: '1',
-        company: 'Tech Corp',
-        position: 'Software Engineer',
-        type: 'technical',
-        date: '2024-09-02',
-        time: '10:00',
-        duration: 120,
-        location: 'Online',
-        meetingLink: 'https://meet.google.com/abc-def-ghi',
-        status: 'scheduled',
-        instructions: 'Prepare for system design and coding questions',
-        reminderSet: true
-      },
-      {
-        id: '2',
-        company: 'StartupXYZ',
-        position: 'Frontend Developer',
-        type: 'coding',
-        date: '2024-09-03',
-        time: '14:00',
-        duration: 90,
-        location: 'Online',
-        meetingLink: 'https://codepair.com/session/xyz123',
-        status: 'scheduled',
-        instructions: 'React and JavaScript focused assessment',
-        reminderSet: false
-      },
-      {
-        id: '3',
-        company: 'BigTech Inc',
-        position: 'Full Stack Developer',
-        type: 'interview',
-        date: '2024-09-05',
-        time: '11:30',
-        duration: 60,
-        location: 'Office - Building A, Floor 3',
-        status: 'scheduled',
-        reminderSet: true
-      },
-      {
-        id: '4',
-        company: 'InnovateLabs',
-        position: 'Backend Engineer',
-        type: 'aptitude',
-        date: '2024-08-28',
-        time: '09:00',
-        duration: 60,
-        location: 'Online',
-        status: 'completed',
-        reminderSet: false
-      },
-      {
-        id: '5',
-        company: 'DataCorp',
-        position: 'Data Analyst',
-        type: 'technical',
-        date: '2024-08-25',
-        time: '15:00',
-        duration: 90,
-        location: 'Online',
-        status: 'missed',
-        reminderSet: true
-      }
-    ]);
-  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -137,14 +55,9 @@ const TestScheduler = () => {
     }
   };
 
-  const toggleReminder = (testId: string) => {
-    setTests(tests.map(test => 
-      test.id === testId 
-        ? { ...test, reminderSet: !test.reminderSet }
-        : test
-    ));
-    
+const toggleReminder = (testId: string) => {
     const test = tests.find(t => t.id === testId);
+    toggleReminderCtx(testId);
     toast({
       title: test?.reminderSet ? "Reminder Removed" : "Reminder Set",
       description: test?.reminderSet 
@@ -154,12 +67,7 @@ const TestScheduler = () => {
   };
 
   const markTestCompleted = (testId: string) => {
-    setTests(tests.map(test => 
-      test.id === testId 
-        ? { ...test, status: 'completed' }
-        : test
-    ));
-    
+    markTestCompletedCtx(testId);
     toast({
       title: "Test Marked as Completed",
       description: "Great job! Don't forget to update your application status.",
@@ -233,7 +141,7 @@ const TestScheduler = () => {
                 className="bg-purple-medium/50 border-border text-white"
               />
             </div>
-            <Button className="btn-primary">
+            <Button className="btn-primary" onClick={() => navigate('/tests/new')}>
               <Plus className="w-4 h-4 mr-2" />
               Schedule Test
             </Button>

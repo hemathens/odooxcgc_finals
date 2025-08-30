@@ -12,13 +12,13 @@ import {
   FileText, 
   Eye, 
   Edit, 
-  Plus,
   Mail,
   Globe,
   MapPin,
   Calendar,
   TrendingUp
 } from "lucide-react";
+import { GraduationHat } from "@/components/ui/graduation-hat";
 import { useToast } from "@/hooks/use-toast";
 
 interface Company {
@@ -290,8 +290,8 @@ const CompanyManagement = () => {
               <p className="text-muted-foreground">Review and manage company registrations</p>
             </div>
             <Button className="btn-primary">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Company
+                              <GraduationHat className="w-4 h-4 mr-2" />
+                Add Company
             </Button>
           </div>
 

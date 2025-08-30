@@ -1,14 +1,14 @@
-# Prentus Clone - Placement Preparation Tracker Integration Documentation
+# Placement Tracker - Placement Preparation Tracker Integration Documentation
 
 ## Overview
 
-This document provides comprehensive documentation for the Prentus-inspired Placement Preparation Tracker frontend application, detailing component architecture, design system integration, and user journey implementation.
+This document provides comprehensive documentation for the Placement Tracker Placement Preparation Tracker frontend application, detailing component architecture, design system integration, and user journey implementation.
 
 ## 🎨 Design System Architecture
 
 ### Color Palette & Theming
 
-The application uses a carefully crafted purple-themed design system inspired by Prentus:
+The application uses a carefully crafted purple-themed design system inspired by Placement Tracker:
 
 ```css
 /* Primary Purple Gradient System */
@@ -22,9 +22,9 @@ The application uses a carefully crafted purple-themed design system inspired by
 --lime-dark: 84 87% 45%;        /* Darker lime for hover states */
 ```
 
-### Component-to-Prentus Mapping
+### Component-to-Placement Tracker Mapping
 
-| **Prentus Element** | **Our Component** | **Implementation** |
+| **Placement Tracker Element** | **Our Component** | **Implementation** |
 |-------------------|------------------|-------------------|
 | Navigation Header | `DashboardLayout` | Sticky header with blur backdrop, responsive nav |
 | Purple Glass Cards | `glass-card` class | Backdrop blur with purple glass effect |
@@ -337,4 +337,4 @@ src/
 .animate-*           /* Animation utility classes */
 ```
 
-This documentation provides a complete reference for understanding and extending the Prentus-inspired Placement Preparation Tracker application.
+This documentation provides a complete reference for understanding and extending the Placement Tracker Placement Preparation Tracker application.

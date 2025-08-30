@@ -16,7 +16,6 @@ import {
   User, 
   Video, 
   MapPin,
-  Plus,
   Search,
   Filter,
   Edit2,
@@ -26,6 +25,7 @@ import {
   Phone,
   MessageSquare
 } from "lucide-react";
+import { GraduationHat } from "@/components/ui/graduation-hat";
 
 interface Interview {
   id: string;
@@ -210,7 +210,7 @@ const InterviewManagement = () => {
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button className="btn-primary">
-                <Plus className="w-4 h-4 mr-2" />
+                <GraduationHat className="w-4 h-4 mr-2" />
                 Schedule Interview
               </Button>
             </DialogTrigger>
@@ -410,7 +410,7 @@ const InterviewManagement = () => {
                 : "No interviews scheduled yet."}
             </p>
             <Button onClick={() => setIsCreateDialogOpen(true)} className="btn-primary">
-              <Plus className="w-4 h-4 mr-2" />
+              <GraduationHat className="w-4 h-4 mr-2" />
               Schedule First Interview
             </Button>
           </Card>

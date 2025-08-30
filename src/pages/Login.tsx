@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth, type UserRole } from "@/context/AuthContext";
-import { Plus } from "lucide-react";
+import { GraduationHat } from "@/components/ui/graduation-hat";
 import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
@@ -60,9 +60,9 @@ const Login = () => {
         <div className="text-center">
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="bg-lime rounded-lg p-3">
-              <Plus className="w-6 h-6 text-purple-dark" />
+              <GraduationHat className="w-6 h-6 text-purple-dark" />
             </div>
-            <span className="text-3xl font-bold text-white">Prentus</span>
+            <span className="text-3xl font-bold text-white">Placement Tracker</span>
           </div>
           <h2 className="text-2xl font-bold text-white">Sign in to your account</h2>
           <p className="text-muted-foreground mt-2">Choose your role and enter your credentials</p>

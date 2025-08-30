@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { 
   Search, 
   Filter, 
-  Plus, 
   Eye, 
   Edit, 
   Calendar,
@@ -16,6 +15,7 @@ import {
   Clock,
   ExternalLink
 } from "lucide-react";
+import { GraduationHat } from "@/components/ui/graduation-hat";
 
 interface Application {
   id: string;
@@ -196,7 +196,7 @@ const ApplicationTracker = () => {
               </select>
             </div>
             <Button className="btn-primary">
-              <Plus className="w-4 h-4 mr-2" />
+              <GraduationHat className="w-4 h-4 mr-2" />
               Add Application
             </Button>
           </div>
@@ -287,7 +287,7 @@ const ApplicationTracker = () => {
                 : 'No applications yet. Start by adding your first application!'}
             </div>
             <Button className="btn-primary mt-4">
-              <Plus className="w-4 h-4 mr-2" />
+              <GraduationHat className="w-4 h-4 mr-2" />
               Add Application
             </Button>
           </Card>

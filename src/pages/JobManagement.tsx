@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { SearchFilterBar } from "@/components/ui/search-filter-bar";
 import { 
-  Plus, 
   FileText, 
   Users, 
   Calendar, 
@@ -22,6 +21,7 @@ import {
   MapPin,
   Briefcase
 } from "lucide-react";
+import { GraduationHat } from "@/components/ui/graduation-hat";
 import { useToast } from "@/hooks/use-toast";
 
 interface JobPosting {
@@ -321,7 +321,7 @@ const JobManagement = () => {
               onClick={() => setShowCreateForm(true)} 
               className="btn-primary"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <GraduationHat className="w-4 h-4 mr-2" />
               Create New Job
             </Button>
           </div>
@@ -485,7 +485,7 @@ const JobManagement = () => {
                   onClick={() => setShowCreateForm(true)} 
                   className="btn-primary mt-4"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
+                  <GraduationHat className="w-4 h-4 mr-2" />
                   Create Job Posting
                 </Button>
               </div>

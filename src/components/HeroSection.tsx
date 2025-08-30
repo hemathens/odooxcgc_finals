@@ -10,7 +10,7 @@ const HeroSection = () => {
         </h1>
         
         <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-          Make advisors 300% more efficient and 3x student engagement. Prentus helps career service teams 
+          Make advisors 300% more efficient and 3x student engagement. Placement Tracker helps career service teams 
           to replace five tools with one platform that uses AI, community, and gamification to get students 
           hired 54% faster.
         </p>
