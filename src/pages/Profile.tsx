@@ -41,22 +41,29 @@ interface ProfileData {
   skills: string[];
   experience: string;
   interests: string[];
+  companyName?: string;
+  companyWebsite?: string;
+  companyLocation?: string;
 }
 
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const role = user?.role || 'student';
+  const storageKey = (base: string) => (user ? `${base}:${user.id}` : base);
   
   const [isEditing, setIsEditing] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [profileImage, setProfileImage] = useState<string | null>(() => {
-    // Try to load saved profile image from localStorage
-    const savedImage = localStorage.getItem('profileImage');
+    // Try to load saved profile image from localStorage per-user, fallback to legacy key
+    const savedImage = localStorage.getItem(storageKey('profileImage')) || localStorage.getItem('profileImage');
     return savedImage || null;
   });
   const [profileData, setProfileData] = useState<ProfileData>(() => {
-    // Try to load saved profile data from localStorage
-    const savedData = localStorage.getItem('profileData');
+    // Try to load saved profile data from localStorage per-user, fallback to legacy key
+    const savedData = localStorage.getItem(storageKey('profileData')) || localStorage.getItem('profileData');
     if (savedData) {
       try {
         return JSON.parse(savedData);
@@ -65,26 +72,48 @@ const Profile = () => {
       }
     }
     
-    // Default data if nothing is saved
+    // Default data if nothing is saved (no dummy data)
     return {
-      firstName: user?.name?.split(' ')[0] || 'John',
-      lastName: user?.name?.split(' ')[1] || 'Doe',
-      email: user?.email || 'john.doe@university.edu',
-      phone: '+1 (555) 123-4567',
-      location: 'San Francisco, CA',
-      university: 'Stanford University',
-      degree: 'Bachelor of Science',
-      graduationYear: '2025',
-      major: 'Computer Science',
-      gpa: '3.8',
-      linkedin: 'linkedin.com/in/johndoe',
-      website: 'johndoe.dev',
-      bio: 'Passionate computer science student with a focus on software engineering and machine learning. Seeking opportunities to apply my skills in real-world projects.',
-      skills: ['JavaScript', 'React', 'Node.js', 'Python', 'Machine Learning', 'Data Structures'],
-      experience: '2 years of software development experience through internships and personal projects.',
-      interests: ['AI/ML', 'Web Development', 'Open Source', 'Hiking', 'Photography']
+      firstName: '',
+      lastName: '',
+      email: user?.email || '',
+      phone: '',
+      location: '',
+      university: '',
+      degree: '',
+      graduationYear: '',
+      major: '',
+      gpa: '',
+      linkedin: '',
+      website: '',
+      bio: '',
+      skills: [],
+      experience: '',
+      interests: [],
+      companyName: role === 'company' ? (user?.companyName || '') : '',
+      companyWebsite: '',
+      companyLocation: '',
     };
   });
+
+  // Helper display functions to avoid blank UI values
+  const dash = (v?: string | null) => (v && v.trim() ? v : '-');
+  const fullName = () => {
+    const fn = profileData.firstName?.trim() || '';
+    const ln = profileData.lastName?.trim() || '';
+    const combined = `${fn} ${ln}`.trim();
+    return combined || '-';
+  };
+
+  const validateProfile = () => {
+    const errs: Record<string, string> = {};
+    if (!profileData.firstName?.trim()) errs.firstName = 'First name is required';
+    if (!profileData.lastName?.trim()) errs.lastName = 'Last name is required';
+    if (!profileData.email?.trim()) errs.email = 'Email is required';
+    if (!profileData.phone?.trim()) errs.phone = 'Phone is required';
+    if (role === 'company' && !profileData.companyName?.trim()) errs.companyName = 'Company name is required';
+    return errs;
+  };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -103,7 +132,7 @@ const Profile = () => {
         const imageData = e.target?.result as string;
         setProfileImage(imageData);
         // Save to localStorage
-        localStorage.setItem('profileImage', imageData);
+        localStorage.setItem(storageKey('profileImage'), imageData);
         toast({
           title: "Profile picture updated",
           description: "Your profile picture has been updated successfully"
@@ -116,7 +145,7 @@ const Profile = () => {
   const handleDeleteImage = () => {
     setProfileImage(null);
     // Remove from localStorage
-    localStorage.removeItem('profileImage');
+    localStorage.removeItem(storageKey('profileImage'));
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -127,10 +156,20 @@ const Profile = () => {
   };
 
   const handleSave = () => {
+    const v = validateProfile();
+    if (Object.keys(v).length > 0) {
+      setErrors(v);
+      setShowErrors(true);
+      toast({ title: 'Missing required fields', description: 'Please complete the highlighted fields.', variant: 'destructive' });
+      return;
+    }
+
     // Save profile data to localStorage
-    localStorage.setItem('profileData', JSON.stringify(profileData));
+    localStorage.setItem(storageKey('profileData'), JSON.stringify(profileData));
     
     setIsEditing(false);
+    setShowErrors(false);
+    setErrors({});
     toast({
       title: "Profile updated",
       description: "Your profile information has been saved successfully"
@@ -139,7 +178,7 @@ const Profile = () => {
 
   const handleCancel = () => {
     // Reload saved data from localStorage to discard changes
-    const savedData = localStorage.getItem('profileData');
+    const savedData = localStorage.getItem(storageKey('profileData')) || localStorage.getItem('profileData');
     if (savedData) {
       try {
         setProfileData(JSON.parse(savedData));
@@ -149,6 +188,8 @@ const Profile = () => {
     }
     
     setIsEditing(false);
+    setShowErrors(false);
+    setErrors({});
     toast({
       title: "Changes cancelled",
       description: "Your changes have been discarded"
@@ -254,10 +295,12 @@ const Profile = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-3xl font-bold text-white">
-                    {profileData.firstName} {profileData.lastName}
+                    {fullName()}
                   </h2>
-                  <p className="text-lime text-lg">{profileData.major} Student</p>
-                  <p className="text-muted-foreground">{profileData.university}</p>
+                  {role === 'student' && (
+                    <p className="text-lime text-lg">{profileData.major ? `${profileData.major} Student` : 'Student'}</p>
+                  )}
+                  <p className="text-muted-foreground">{dash(profileData.university)}</p>
                 </div>
                 
                                  <div className="flex gap-2">
@@ -267,7 +310,7 @@ const Profile = () => {
                          <Save className="w-4 h-4 mr-2" />
                          Save
                        </Button>
-                       <Button onClick={handleCancel} variant="outline" className="text-white border-border">
+                       <Button onClick={handleCancel} variant="ghost" className="text-white hover:bg-purple-medium/50">
                          <X className="w-4 h-4 mr-2" />
                          Cancel
                        </Button>
@@ -296,7 +339,7 @@ const Profile = () => {
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <GraduationCap className="w-4 h-4" />
-                  <span>Class of {profileData.graduationYear}</span>
+                  <span>Class of {dash(profileData.graduationYear)}</span>
                 </div>
               </div>
             </div>
@@ -325,6 +368,12 @@ const Profile = () => {
                   ) : (
                     <p className="text-muted-foreground">{profileData.firstName}</p>
                   )}
+                  {showErrors && errors.firstName && (
+                    <p className="text-red-400 text-xs mt-1">{errors.firstName}</p>
+                  )}
+                  {!isEditing && !profileData.firstName?.trim() && (
+                    <p className="text-muted-foreground">-</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-white mb-2">Last Name</label>
@@ -336,6 +385,12 @@ const Profile = () => {
                     />
                   ) : (
                     <p className="text-muted-foreground">{profileData.lastName}</p>
+                  )}
+                  {showErrors && errors.lastName && (
+                    <p className="text-red-400 text-xs mt-1">{errors.lastName}</p>
+                  )}
+                  {!isEditing && !profileData.lastName?.trim() && (
+                    <p className="text-muted-foreground">-</p>
                   )}
                 </div>
               </div>
@@ -349,7 +404,10 @@ const Profile = () => {
                     className="bg-purple-medium/50 border-border text-white"
                   />
                 ) : (
-                  <p className="text-muted-foreground">{profileData.email}</p>
+                  <p className="text-muted-foreground">{dash(profileData.email)}</p>
+                )}
+                {showErrors && errors.email && (
+                  <p className="text-red-400 text-xs mt-1">{errors.email}</p>
                 )}
               </div>
 
@@ -362,7 +420,10 @@ const Profile = () => {
                     className="bg-purple-medium/50 border-border text-white"
                   />
                 ) : (
-                  <p className="text-muted-foreground">{profileData.phone}</p>
+                  <p className="text-muted-foreground">{dash(profileData.phone)}</p>
+                )}
+                {showErrors && errors.phone && (
+                  <p className="text-red-400 text-xs mt-1">{errors.phone}</p>
                 )}
               </div>
 
@@ -375,11 +436,61 @@ const Profile = () => {
                     className="bg-purple-medium/50 border-border text-white"
                   />
                 ) : (
-                  <p className="text-muted-foreground">{profileData.location}</p>
+                  <p className="text-muted-foreground">{dash(profileData.location)}</p>
                 )}
               </div>
             </div>
           </Card>
+
+          {role === 'company' && (
+            <Card className="glass-card p-6">
+              <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <Building className="w-5 h-5 text-lime" />
+                Company Information
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">Company Name</label>
+                  {isEditing ? (
+                    <Input
+                      value={profileData.companyName || ''}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, companyName: e.target.value }))}
+                      className="bg-purple-medium/50 border-border text-white"
+                    />
+                  ) : (
+                    <p className="text-muted-foreground">{dash(profileData.companyName)}</p>
+                  )}
+                  {showErrors && errors.companyName && (
+                    <p className="text-red-400 text-xs mt-1">{errors.companyName}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">Company Website</label>
+                  {isEditing ? (
+                    <Input
+                      value={profileData.companyWebsite || ''}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, companyWebsite: e.target.value }))}
+                      className="bg-purple-medium/50 border-border text-white"
+                    />
+                  ) : (
+                    <p className="text-muted-foreground">{dash(profileData.companyWebsite)}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">Company Location</label>
+                  {isEditing ? (
+                    <Input
+                      value={profileData.companyLocation || ''}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, companyLocation: e.target.value }))}
+                      className="bg-purple-medium/50 border-border text-white"
+                    />
+                  ) : (
+                    <p className="text-muted-foreground">{dash(profileData.companyLocation)}</p>
+                  )}
+                </div>
+              </div>
+            </Card>
+          )}
 
           {/* Academic Information */}
           <Card className="glass-card p-6">
@@ -398,7 +509,7 @@ const Profile = () => {
                     className="bg-purple-medium/50 border-border text-white"
                   />
                 ) : (
-                  <p className="text-muted-foreground">{profileData.university}</p>
+                  <p className="text-muted-foreground">{dash(profileData.university)}</p>
                 )}
               </div>
 
@@ -412,7 +523,7 @@ const Profile = () => {
                       className="bg-purple-medium/50 border-border text-white"
                     />
                   ) : (
-                    <p className="text-muted-foreground">{profileData.degree}</p>
+                    <p className="text-muted-foreground">{dash(profileData.degree)}</p>
                   )}
                 </div>
                 <div>
@@ -424,7 +535,7 @@ const Profile = () => {
                       className="bg-purple-medium/50 border-border text-white"
                     />
                   ) : (
-                    <p className="text-muted-foreground">{profileData.major}</p>
+                    <p className="text-muted-foreground">{dash(profileData.major)}</p>
                   )}
                 </div>
               </div>
@@ -439,7 +550,7 @@ const Profile = () => {
                       className="bg-purple-medium/50 border-border text-white"
                     />
                   ) : (
-                    <p className="text-muted-foreground">{profileData.graduationYear}</p>
+                    <p className="text-muted-foreground">{dash(profileData.graduationYear)}</p>
                   )}
                 </div>
                 <div>
@@ -451,7 +562,7 @@ const Profile = () => {
                       className="bg-purple-medium/50 border-border text-white"
                     />
                   ) : (
-                    <p className="text-muted-foreground">{profileData.gpa}</p>
+                    <p className="text-muted-foreground">{dash(profileData.gpa)}</p>
                   )}
                 </div>
               </div>
@@ -564,7 +675,7 @@ const Profile = () => {
 
         {/* Bio and Experience */}
         <Card className="glass-card p-6">
-          <h3 className="text-xl font-semibold text-white mb-4">About Me</h3>
+          <h3 className="text-xl font-semibold text-white mb-4">{role === 'company' ? `About ${profileData.companyName || 'Company'}` : 'About Me'}</h3>
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-white mb-2">Bio</label>
@@ -576,7 +687,7 @@ const Profile = () => {
                   placeholder="Tell us about yourself..."
                 />
               ) : (
-                <p className="text-muted-foreground">{profileData.bio}</p>
+                <p className="text-muted-foreground">{dash(profileData.bio)}</p>
               )}
             </div>
 
@@ -590,7 +701,7 @@ const Profile = () => {
                   placeholder="Describe your experience..."
                 />
               ) : (
-                <p className="text-muted-foreground">{profileData.experience}</p>
+                <p className="text-muted-foreground">{dash(profileData.experience)}</p>
               )}
             </div>
           </div>
@@ -613,7 +724,7 @@ const Profile = () => {
                   placeholder="linkedin.com/in/username"
                 />
               ) : (
-                <p className="text-muted-foreground">{profileData.linkedin}</p>
+                <p className="text-muted-foreground">{dash(profileData.linkedin)}</p>
               )}
             </div>
 
@@ -630,7 +741,7 @@ const Profile = () => {
                   placeholder="yourwebsite.com"
                 />
               ) : (
-                <p className="text-muted-foreground">{profileData.website}</p>
+                <p className="text-muted-foreground">{dash(profileData.website)}</p>
               )}
             </div>
           </div>

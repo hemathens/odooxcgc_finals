@@ -29,6 +29,7 @@ import {
   Calendar
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 
 interface SettingsData {
   notifications: {
@@ -64,6 +65,7 @@ interface SettingsData {
 
 const Settings = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const [settings, setSettings] = useState<SettingsData>(() => {
     // Try to load saved settings from localStorage
@@ -165,9 +167,9 @@ const Settings = () => {
   };
 
   const exportData = () => {
-    // Get profile data if available
-    const profileData = localStorage.getItem('profileData');
-    const profileImage = localStorage.getItem('profileImage');
+    // Get profile data if available (per-user keys with legacy fallback)
+    const profileData = localStorage.getItem(user ? `profileData:${user.id}` : 'profileData') || localStorage.getItem('profileData');
+    const profileImage = localStorage.getItem(user ? `profileImage:${user.id}` : 'profileImage') || localStorage.getItem('profileImage');
     
     // Create a data object with all user settings and profile data
     const exportDataObj = {

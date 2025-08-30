@@ -57,105 +57,27 @@ const statusOptions = [
 
 const JobManagement = () => {
   const { toast } = useToast();
-  const [jobs, setJobs] = useState<JobPosting[]>([]);
+  const [jobs, setJobs] = useState<JobPosting[]>(() => {
+    try {
+      const saved = localStorage.getItem('jobs');
+      return saved ? JSON.parse(saved) as JobPosting[] : [];
+    } catch {
+      return [];
+    }
+  });
   const [filteredJobs, setFilteredJobs] = useState<JobPosting[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   useEffect(() => {
-    // Mock data loading
-    const loadJobs = async () => {
-      setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockJobs: JobPosting[] = [
-        {
-          id: '1',
-          title: 'Senior Software Engineer',
-          department: 'Engineering',
-          location: 'Bangalore, India',
-          type: 'Full-time',
-          experience: '3-5 years',
-          salary: { min: 15, max: 25, currency: 'INR (Lakhs)' },
-          description: 'We are looking for an experienced Software Engineer to join our dynamic team. You will be responsible for developing high-quality software solutions and mentoring junior developers.',
-          requirements: ['Bachelor\'s degree in Computer Science', '3+ years of experience with React/Angular', 'Strong knowledge of Node.js', 'Experience with cloud platforms (AWS/Azure)', 'Excellent problem-solving skills'],
-          benefits: ['Competitive salary', 'Health insurance', 'Flexible work hours', 'Professional development budget', 'Stock options'],
-          status: 'published',
-          postedDate: '2024-08-15',
-          deadline: '2024-09-15',
-          applicants: 42,
-          shortlisted: 15,
-          interviewed: 8,
-          selected: 2
-        },
-        {
-          id: '2',
-          title: 'Frontend Developer',
-          department: 'Engineering',
-          location: 'Mumbai, India',
-          type: 'Full-time',
-          experience: '1-3 years',
-          salary: { min: 8, max: 15, currency: 'INR (Lakhs)' },
-          description: 'Join our frontend team to create amazing user experiences. You\'ll work with modern technologies and collaborate with designers to bring interfaces to life.',
-          requirements: ['Bachelor\'s degree in relevant field', 'Proficiency in React.js', 'Experience with TypeScript', 'Knowledge of CSS frameworks', 'Understanding of responsive design'],
-          benefits: ['Competitive salary', 'Health insurance', 'Learning budget', 'Flexible hours'],
-          status: 'published',
-          postedDate: '2024-08-20',
-          deadline: '2024-09-20',
-          applicants: 28,
-          shortlisted: 12,
-          interviewed: 5,
-          selected: 1
-        },
-        {
-          id: '3',
-          title: 'Data Science Intern',
-          department: 'Analytics',
-          location: 'Hyderabad, India',
-          type: 'Internship',
-          experience: '0-1 years',
-          salary: { min: 30000, max: 50000, currency: 'INR (Per month)' },
-          description: 'Exciting internship opportunity to work with our data science team. Perfect for students looking to gain hands-on experience in machine learning and data analysis.',
-          requirements: ['Currently pursuing degree in Data Science/Statistics', 'Knowledge of Python/R', 'Basic understanding of ML algorithms', 'Strong analytical skills'],
-          benefits: ['Mentorship program', 'Certificate upon completion', 'Potential for full-time offer', 'Learning resources'],
-          status: 'published',
-          postedDate: '2024-08-25',
-          deadline: '2024-09-10',
-          applicants: 65,
-          shortlisted: 20,
-          interviewed: 10,
-          selected: 3
-        },
-        {
-          id: '4',
-          title: 'Product Manager',
-          department: 'Product',
-          location: 'Pune, India',
-          type: 'Full-time',
-          experience: '5-8 years',
-          salary: { min: 25, max: 40, currency: 'INR (Lakhs)' },
-          description: 'Lead product strategy and execution for our core platform. Work closely with engineering, design, and business teams to deliver exceptional products.',
-          requirements: ['MBA or equivalent experience', '5+ years in product management', 'Experience with agile methodologies', 'Strong analytical skills', 'Excellent communication'],
-          benefits: ['Competitive salary', 'Equity participation', 'Health benefits', 'Flexible work options'],
-          status: 'draft',
-          postedDate: '2024-08-28',
-          deadline: '2024-10-01',
-          applicants: 0,
-          shortlisted: 0,
-          interviewed: 0,
-          selected: 0
-        }
-      ];
-      
-      setJobs(mockJobs);
-      setFilteredJobs(mockJobs);
-      setIsLoading(false);
-    };
-
-    loadJobs();
+    setFilteredJobs(jobs);
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('jobs', JSON.stringify(jobs));
+  }, [jobs]);
 
   useEffect(() => {
     let filtered = jobs;
@@ -241,20 +163,6 @@ const JobManagement = () => {
     totalApplicants: jobs.reduce((sum, job) => sum + job.applicants, 0)
   };
 
-  if (isLoading) {
-    return (
-      <DashboardLayout title="Job Management" subtitle="Create and manage job postings">
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="loading-skeleton h-24 animate-pulse"></div>
-            ))}
-          </div>
-          <div className="loading-skeleton h-96 animate-pulse"></div>
-        </div>
-      </DashboardLayout>
-    );
-  }
 
   return (
     <DashboardLayout title="Job Management" subtitle="Create and manage job postings">
@@ -335,6 +243,13 @@ const JobManagement = () => {
             placeholder="Search jobs by title, department, or location..."
           />
         </Card>
+
+        {/* Create Form */}
+        {showCreateForm && (
+          <Card className="glass-card p-6">
+            <JobCreateForm onCancel={() => setShowCreateForm(false)} onCreate={(job) => { setJobs([job, ...jobs]); setShowCreateForm(false); toast({ title: 'Job Created', description: 'New job has been added.'}); }} />
+          </Card>
+        )}
 
         {/* Job List */}
         <Card className="glass-card p-6">
@@ -498,3 +413,110 @@ const JobManagement = () => {
 };
 
 export default JobManagement;
+
+// Inline create form component
+function JobCreateForm({ onCancel, onCreate }: { onCancel: () => void; onCreate: (job: JobPosting) => void }) {
+  const [title, setTitle] = useState("");
+  const [department, setDepartment] = useState("");
+  const [location, setLocation] = useState("");
+  const [type, setType] = useState<JobPosting['type']>('Full-time');
+  const [experience, setExperience] = useState("");
+  const [salaryMin, setSalaryMin] = useState<number>(0);
+  const [salaryMax, setSalaryMax] = useState<number>(0);
+  const [currency, setCurrency] = useState("INR (Lakhs)");
+  const [deadline, setDeadline] = useState("");
+  const [description, setDescription] = useState("");
+  const [requirements, setRequirements] = useState("");
+  const [benefits, setBenefits] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title || !department || !location || !experience || !deadline) return;
+    const job: JobPosting = {
+      id: Date.now().toString(),
+      title,
+      department,
+      location,
+      type,
+      experience,
+      salary: { min: Number(salaryMin) || 0, max: Number(salaryMax) || 0, currency },
+      description,
+      requirements: requirements.split(',').map(s => s.trim()).filter(Boolean),
+      benefits: benefits.split(',').map(s => s.trim()).filter(Boolean),
+      status: 'draft',
+      postedDate: new Date().toISOString().split('T')[0],
+      deadline,
+      applicants: 0,
+      shortlisted: 0,
+      interviewed: 0,
+      selected: 0,
+    };
+    onCreate(job);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm text-white mb-2">Title</label>
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Department</label>
+          <Input value={department} onChange={(e) => setDepartment(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Location</label>
+          <Input value={location} onChange={(e) => setLocation(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Type</label>
+          <select value={type} onChange={(e) => setType(e.target.value as JobPosting['type'])} className="w-full h-10 rounded-md bg-purple-medium/50 border border-border text-white px-3">
+            <option value="Full-time">Full-time</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Internship">Internship</option>
+            <option value="Contract">Contract</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Experience</label>
+          <Input value={experience} onChange={(e) => setExperience(e.target.value)} placeholder="e.g., 3-5 years" className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Deadline</label>
+          <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Salary Min</label>
+          <Input type="number" value={salaryMin} onChange={(e) => setSalaryMin(Number(e.target.value))} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Salary Max</label>
+          <Input type="number" value={salaryMax} onChange={(e) => setSalaryMax(Number(e.target.value))} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Currency</label>
+          <Input value={currency} onChange={(e) => setCurrency(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+      </div>
+      <div>
+        <label className="block text-sm text-white mb-2">Description</label>
+        <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm text-white mb-2">Requirements (comma separated)</label>
+          <Input value={requirements} onChange={(e) => setRequirements(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Benefits (comma separated)</label>
+          <Input value={benefits} onChange={(e) => setBenefits(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="ghost" className="text-white hover:bg-purple-medium/50" onClick={onCancel}>Cancel</Button>
+        <Button type="submit" className="btn-primary">Create Job</Button>
+      </div>
+    </form>
+  );
+}

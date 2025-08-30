@@ -22,7 +22,15 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
 
-    const success = await login(email, password, role);
+    // normalize email to lowercase and enforce password > 8
+    const emailLower = email.trim().toLowerCase();
+    if (password.length < 8) {
+      toast({ title: "Password too short", description: "Password must be at least 8 characters.", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
+    const success = await login(emailLower, password, role);
     
     if (success) {
       toast({
@@ -64,7 +72,7 @@ const Login = () => {
             </div>
             <span className="text-3xl font-bold text-white">Placement Tracker</span>
           </div>
-          <h2 className="text-2xl font-bold text-white">Sign in to your account</h2>
+          <h2 className="text-2xl font-bold text-white">Login to your account</h2>
           <p className="text-muted-foreground mt-2">Choose your role and enter your credentials</p>
         </div>
 
@@ -126,13 +134,20 @@ const Login = () => {
               disabled={loading}
               className="btn-primary w-full"
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-muted-foreground text-sm">
               Demo credentials: any email/password combination
+            </p>
+          </div>
+
+          <div className="mt-4 text-center">
+            <p className="text-muted-foreground text-sm">
+              Don’t have an account? {" "}
+              <button onClick={() => navigate('/signup')} className="text-lime hover:text-lime-dark">Sign up</button>
             </p>
           </div>
         </Card>

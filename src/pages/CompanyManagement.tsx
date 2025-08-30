@@ -3,6 +3,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { SearchFilterBar } from "@/components/ui/search-filter-bar";
 import { 
   Building, 
@@ -53,112 +54,28 @@ const statusOptions = [
 
 const CompanyManagement = () => {
   const { toast } = useToast();
-  const [companies, setCompanies] = useState<Company[]>([]);
+  const [companies, setCompanies] = useState<Company[]>(() => {
+    try {
+      const saved = localStorage.getItem('companies');
+      return saved ? JSON.parse(saved) as Company[] : [];
+    } catch {
+      return [];
+    }
+  });
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+
 
   useEffect(() => {
-    // Mock data loading
-    const loadCompanies = async () => {
-      setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockCompanies: Company[] = [
-        {
-          id: '1',
-          name: 'Tech Corp Solutions',
-          email: 'hr@techcorp.com',
-          website: 'https://techcorp.com',
-          location: 'Bangalore, India',
-          industry: 'Software Development',
-          size: '500-1000',
-          status: 'active',
-          registrationDate: '2024-01-15',
-          lastActivity: '2024-08-29',
-          jobPostings: 8,
-          totalApplications: 120,
-          hires: 15,
-          contactPerson: {
-            name: 'Sarah Johnson',
-            designation: 'HR Manager',
-            email: 'sarah.j@techcorp.com',
-            phone: '+91 9876543210'
-          }
-        },
-        {
-          id: '2',
-          name: 'StartupXYZ',
-          email: 'recruitment@startupxyz.com',
-          website: 'https://startupxyz.com',
-          location: 'Mumbai, India',
-          industry: 'Fintech',
-          size: '50-100',
-          status: 'approved',
-          registrationDate: '2024-02-20',
-          lastActivity: '2024-08-28',
-          jobPostings: 5,
-          totalApplications: 75,
-          hires: 8,
-          contactPerson: {
-            name: 'Raj Patel',
-            designation: 'Talent Acquisition Lead',
-            email: 'raj.p@startupxyz.com',
-            phone: '+91 9876543211'
-          }
-        },
-        {
-          id: '3',
-          name: 'BigTech Industries',
-          email: 'campus@bigtech.com',
-          website: 'https://bigtech.com',
-          location: 'Hyderabad, India',
-          industry: 'Enterprise Software',
-          size: '1000+',
-          status: 'pending',
-          registrationDate: '2024-08-25',
-          lastActivity: '2024-08-30',
-          jobPostings: 0,
-          totalApplications: 0,
-          hires: 0,
-          contactPerson: {
-            name: 'Michael Chen',
-            designation: 'Campus Relations Manager',
-            email: 'michael.c@bigtech.com',
-            phone: '+91 9876543212'
-          }
-        },
-        {
-          id: '4',
-          name: 'InnovateLabs',
-          email: 'hiring@innovatelabs.com',
-          website: 'https://innovatelabs.com',
-          location: 'Pune, India',
-          industry: 'AI/ML',
-          size: '100-500',
-          status: 'active',
-          registrationDate: '2024-03-10',
-          lastActivity: '2024-08-27',
-          jobPostings: 12,
-          totalApplications: 200,
-          hires: 25,
-          contactPerson: {
-            name: 'Priya Sharma',
-            designation: 'Head of Recruitment',
-            email: 'priya.s@innovatelabs.com',
-            phone: '+91 9876543213'
-          }
-        }
-      ];
-      
-      setCompanies(mockCompanies);
-      setFilteredCompanies(mockCompanies);
-      setIsLoading(false);
-    };
+    localStorage.setItem('companies', JSON.stringify(companies));
+  }, [companies]);
 
-    loadCompanies();
-  }, []);
+  useEffect(() => {
+    setFilteredCompanies(companies);
+  }, [companies]);
 
   useEffect(() => {
     let filtered = companies;
@@ -289,9 +206,9 @@ const CompanyManagement = () => {
               <h3 className="text-xl font-semibold text-white">Company Partnerships</h3>
               <p className="text-muted-foreground">Review and manage company registrations</p>
             </div>
-            <Button className="btn-primary">
-                              <GraduationHat className="w-4 h-4 mr-2" />
-                Add Company
+            <Button className="btn-primary" onClick={() => setShowCreateForm(true)}>
+              <GraduationHat className="w-4 h-4 mr-2" />
+              Add Company
             </Button>
           </div>
 
@@ -304,6 +221,13 @@ const CompanyManagement = () => {
             placeholder="Search companies by name, industry, or location..."
           />
         </Card>
+
+        {/* Create Company Form */}
+        {showCreateForm && (
+          <Card className="glass-card p-6">
+            <CompanyCreateForm onCancel={() => setShowCreateForm(false)} onCreate={(company) => { setCompanies([company, ...companies]); setShowCreateForm(false); }} />
+          </Card>
+        )}
 
         {/* Company List */}
         <Card className="glass-card p-6">
@@ -444,3 +368,82 @@ const CompanyManagement = () => {
 };
 
 export default CompanyManagement;
+
+function CompanyCreateForm({ onCancel, onCreate }: { onCancel: () => void; onCreate: (company: Company) => void }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [website, setWebsite] = useState("");
+  const [location, setLocation] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [size, setSize] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [contactDesignation, setContactDesignation] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email || !location || !industry || !size) return;
+    const company: Company = {
+      id: Date.now().toString(),
+      name,
+      email: email.trim().toLowerCase(),
+      website,
+      location,
+      industry,
+      size,
+      status: 'pending',
+      registrationDate: new Date().toISOString().split('T')[0],
+      lastActivity: new Date().toISOString().split('T')[0],
+      jobPostings: 0,
+      totalApplications: 0,
+      hires: 0,
+      contactPerson: { name: contactName, designation: contactDesignation, email: contactEmail, phone: contactPhone }
+    };
+    onCreate(company);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm text-white mb-2">Company Name</label>
+          <Input value={name} onChange={(e) => setName(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Email</label>
+          <Input value={email} onChange={(e) => setEmail(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Website</label>
+          <Input value={website} onChange={(e) => setWebsite(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Location</label>
+          <Input value={location} onChange={(e) => setLocation(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Industry</label>
+          <Input value={industry} onChange={(e) => setIndustry(e.target.value)} className="bg-purple-medium/50 border-border text-white" />
+        </div>
+        <div>
+          <label className="block text-sm text-white mb-2">Company Size</label>
+          <Input value={size} onChange={(e) => setSize(e.target.value)} placeholder="e.g., 100-500" className="bg-purple-medium/50 border-border text-white" />
+        </div>
+      </div>
+      <div className="bg-purple-medium/30 p-4 rounded-lg">
+        <p className="text-white font-medium mb-2">Contact Person</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder="Name" className="bg-purple-medium/50 border-border text-white" />
+          <Input value={contactDesignation} onChange={(e) => setContactDesignation(e.target.value)} placeholder="Designation" className="bg-purple-medium/50 border-border text-white" />
+          <Input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="Email" className="bg-purple-medium/50 border-border text-white" />
+          <Input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="Phone" className="bg-purple-medium/50 border-border text-white" />
+        </div>
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="ghost" className="text-white hover:bg-purple-medium/50" onClick={onCancel}>Cancel</Button>
+        <Button type="submit" className="btn-primary">Add Company</Button>
+      </div>
+    </form>
+  );
+}
