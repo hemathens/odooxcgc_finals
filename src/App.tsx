@@ -16,6 +16,10 @@ import StudentManagement from "./pages/StudentManagement";
 import CompanyManagement from "./pages/CompanyManagement";
 import PlacementReports from "./pages/PlacementReports";
 import JobManagement from "./pages/JobManagement";
+import PlacementEvents from "./pages/PlacementEvents";
+import CandidateReview from "./pages/CandidateReview";
+import InterviewManagement from "./pages/InterviewManagement";
+import RecruitmentAnalytics from "./pages/RecruitmentAnalytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,10 +46,14 @@ const App = () => (
           <Route path="/student-management" element={<StudentManagement />} />
           <Route path="/company-management" element={<CompanyManagement />} />
           <Route path="/placement-reports" element={<PlacementReports />} />
+          <Route path="/placement-events" element={<PlacementEvents />} />
           
           {/* Company Routes */}
           <Route path="/company-dashboard" element={<CompanyDashboard />} />
           <Route path="/job-management" element={<JobManagement />} />
+          <Route path="/candidate-review" element={<CandidateReview />} />
+          <Route path="/interview-management" element={<InterviewManagement />} />
+          <Route path="/recruitment-analytics" element={<RecruitmentAnalytics />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
