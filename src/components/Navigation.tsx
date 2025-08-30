@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { GraduationHat } from "@/components/ui/graduation-hat";
+import { Link } from "react-router-dom";
 
 const Navigation = () => {
   return (
@@ -12,14 +13,14 @@ const Navigation = () => {
       </div>
       
       <div className="flex items-center gap-4">
-        <button 
-          onClick={() => window.location.href = '/login'}
+        <Link 
+          to="/login"
           className="text-foreground hover:text-lime transition-colors duration-300 font-medium"
         >
           Login
-        </button>
-        <Button className="btn-primary">
-          Schedule Demo
+        </Link>
+        <Button asChild className="btn-primary">
+          <Link to="/signup">Schedule Demo</Link>
         </Button>
       </div>
     </nav>

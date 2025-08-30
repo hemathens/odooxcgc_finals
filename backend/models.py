@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, Enum, ForeignKey, Float
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from database import Base
 import enum
 
@@ -23,3 +24,74 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class JobCategory(str, enum.Enum):
+    TIER1 = "tier1"
+    TIER2 = "tier2"
+    TIER3 = "tier3"
+    INTERNSHIP = "internship"
+
+class ApplicationStatus(str, enum.Enum):
+    APPLIED = "applied"
+    SHORTLISTED = "shortlisted"
+    OFFERED = "offered"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    WITHDRAWN = "withdrawn"
+
+class StudentProfile(Base):
+    __tablename__ = "student_profiles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+
+    cgpa = Column(Float, default=0.0)
+    skills_json = Column(Text, nullable=True)  # JSON-encoded list of skills
+    backlogs = Column(Integer, default=0)
+
+    upgrades_used = Column(Integer, default=0)
+    highest_accepted_tier = Column(Enum(JobCategory), nullable=True)
+    highest_accepted_package_lpa = Column(Float, nullable=True)
+    placed_final = Column(Boolean, default=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    user = relationship("User")
+
+class Job(Base):
+    __tablename__ = "jobs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    company_name = Column(String(200), nullable=False)
+
+    package_lpa = Column(Float, nullable=True)  # May be null for internships
+    category = Column(Enum(JobCategory), nullable=False)
+
+    min_cgpa = Column(Float, default=0.0)
+    required_skills_json = Column(Text, nullable=True)  # JSON-encoded list
+    max_backlogs = Column(Integer, default=999)
+
+    is_active = Column(Boolean, default=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class Application(Base):
+    __tablename__ = "applications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    job_id = Column(Integer, ForeignKey("jobs.id"), nullable=False)
+
+    status = Column(Enum(ApplicationStatus), default=ApplicationStatus.APPLIED, nullable=False)
+    is_final_acceptance = Column(Boolean, default=False)
+    offered_package_lpa = Column(Float, nullable=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    student = relationship("User")
+    job = relationship("Job")

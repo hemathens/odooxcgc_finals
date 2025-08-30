@@ -5,21 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { 
   Bell, 
   Shield, 
-  Palette, 
   User, 
   Lock, 
   Eye, 
   EyeOff,
   Save,
-  Moon,
-  Sun,
-  Monitor,
   Mail,
-  Smartphone,
   Globe,
   Database,
   Download,
@@ -48,12 +42,6 @@ interface SettingsData {
     showLocation: boolean;
     allowSearchEngines: boolean;
     dataSharing: boolean;
-  };
-  appearance: {
-    theme: 'light' | 'dark' | 'system';
-    fontSize: 'small' | 'medium' | 'large';
-    compactMode: boolean;
-    animations: boolean;
   };
   account: {
     language: string;
@@ -96,12 +84,6 @@ const Settings = () => {
         showLocation: true,
         allowSearchEngines: false,
         dataSharing: true,
-      },
-      appearance: {
-        theme: 'dark',
-        fontSize: 'medium',
-        compactMode: false,
-        animations: true,
       },
       account: {
         language: 'English',
@@ -207,15 +189,6 @@ const Settings = () => {
         description: "Your account deletion request has been submitted. You will receive a confirmation email.",
         variant: "destructive"
       });
-    }
-  };
-
-  const getThemeIcon = (theme: string) => {
-    switch (theme) {
-      case 'light': return <Sun className="w-4 h-4" />;
-      case 'dark': return <Moon className="w-4 h-4" />;
-      case 'system': return <Monitor className="w-4 h-4" />;
-      default: return <Monitor className="w-4 h-4" />;
     }
   };
 
@@ -363,87 +336,6 @@ const Settings = () => {
           </div>
         </Card>
 
-        {/* Appearance Settings */}
-        <Card className="glass-card p-6">
-          <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            <Palette className="w-5 h-5 text-lime" />
-            Appearance
-          </h3>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">Theme</label>
-              <Select
-                value={settings.appearance.theme}
-                onValueChange={(value) => updateSetting('appearance', 'theme', value)}
-              >
-                <SelectTrigger className="bg-purple-medium/50 border-border text-white">
-                  <div className="flex items-center gap-2">
-                    {getThemeIcon(settings.appearance.theme)}
-                    <SelectValue />
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="bg-purple-medium border-border">
-                  <SelectItem value="light" className="text-white">
-                    <div className="flex items-center gap-2">
-                      <Sun className="w-4 h-4" />
-                      Light
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="dark" className="text-white">
-                    <div className="flex items-center gap-2">
-                      <Moon className="w-4 h-4" />
-                      Dark
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="system" className="text-white">
-                    <div className="flex items-center gap-2">
-                      <Monitor className="w-4 h-4" />
-                      System
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-white mb-2">Font Size</label>
-                <Select
-                  value={settings.appearance.fontSize}
-                  onValueChange={(value) => updateSetting('appearance', 'fontSize', value)}
-                >
-                  <SelectTrigger className="bg-purple-medium/50 border-border text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-purple-medium border-border">
-                    <SelectItem value="small" className="text-white">Small</SelectItem>
-                    <SelectItem value="medium" className="text-white">Medium</SelectItem>
-                    <SelectItem value="large" className="text-white">Large</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-purple-medium/30 rounded-lg">
-                <span className="text-white">Compact Mode</span>
-                <Switch
-                  checked={settings.appearance.compactMode}
-                  onCheckedChange={(checked) => updateSetting('appearance', 'compactMode', checked)}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-purple-medium/30 rounded-lg">
-              <span className="text-white">Enable Animations</span>
-              <Switch
-                checked={settings.appearance.animations}
-                onCheckedChange={(checked) => updateSetting('appearance', 'animations', checked)}
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Account Settings */}
         <Card className="glass-card p-6">
           <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
             <User className="w-5 h-5 text-lime" />

@@ -1,5 +1,7 @@
 from database import engine, Base
-from models import User
+# Import models module to ensure all models are registered with Base
+from models import User, StudentProfile, Job, Application
+
 
 def create_tables():
     """Create all database tables"""

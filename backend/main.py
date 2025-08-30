@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 
 # Import routers
-from routers import auth, users, applications, tests, notifications
+from routers import auth, users, applications, tests, notifications, jobs
 
 app = FastAPI(
     title="Placement Tracker API",
@@ -25,6 +25,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(applications.router, prefix="/api/applications", tags=["Applications"])
+app.include_router(jobs.router, prefix="/api/jobs", tags=["Jobs"])
 app.include_router(tests.router, prefix="/api/tests", tags=["Tests"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
 

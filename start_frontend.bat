@@ -1,0 +1,6 @@
+@echo off
+echo Installing Frontend Dependencies...
+npm install
+echo Starting Placement Tracker Frontend...
+npm run dev
+pause

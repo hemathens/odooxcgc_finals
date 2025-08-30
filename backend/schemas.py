@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional
-from models import UserRole
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional, List
+from models import UserRole, JobCategory, ApplicationStatus
 from datetime import datetime
 
 # User schemas
@@ -39,3 +39,63 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+# Student Profile
+class StudentProfileBase(BaseModel):
+    cgpa: float = 0.0
+    skills: List[str] = Field(default_factory=list)
+    backlogs: int = 0
+
+class StudentProfileResponse(StudentProfileBase):
+    id: int
+    user_id: int
+    upgrades_used: int
+    highest_accepted_tier: Optional[JobCategory] = None
+    highest_accepted_package_lpa: Optional[float] = None
+    placed_final: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Job schemas
+class JobBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+    company_name: str
+    package_lpa: Optional[float] = None  # Required for non-internships
+    category: JobCategory  # Must be consistent with package rules
+    min_cgpa: float = 0.0
+    required_skills: List[str] = Field(default_factory=list)
+    max_backlogs: int = 999
+
+class JobCreate(JobBase):
+    pass
+
+class JobResponse(JobBase):
+    id: int
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Application schemas
+class ApplyRequest(BaseModel):
+    job_id: int
+
+class AcceptOfferRequest(BaseModel):
+    application_id: int
+    final: bool = False
+
+class ApplicationResponse(BaseModel):
+    id: int
+    student_id: int
+    job_id: int
+    status: ApplicationStatus
+    is_final_acceptance: bool
+    offered_package_lpa: Optional[float] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

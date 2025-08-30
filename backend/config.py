@@ -3,7 +3,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # Database
-    database_url: str = "sqlite:///./placement_tracker.db"
+    database_url: str = "postgresql://placement_user:placement_password_2024@localhost:5432/placement_tracker"
     
     # JWT
     secret_key: str = "your-super-secret-jwt-key-here-change-this-in-production"

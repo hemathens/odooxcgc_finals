@@ -5,7 +5,7 @@ from datetime import timedelta
 from typing import Optional
 
 from database import get_db
-from models import User, UserRole
+from models import User, UserRole, StudentProfile
 from schemas import UserCreate, UserLogin, GoogleLoginRequest, Token, UserResponse
 from auth_utils import (
     verify_password, 
@@ -75,6 +75,15 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+
+    # Bootstrap student profile if needed
+    if db_user.role == UserRole.STUDENT:
+        profile = db.query(StudentProfile).filter(StudentProfile.user_id == db_user.id).first()
+        if not profile:
+            profile = StudentProfile(user_id=db_user.id)
+            db.add(profile)
+            db.commit()
+            db.refresh(profile)
     
     # Create access token
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
