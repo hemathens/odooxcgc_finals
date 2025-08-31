@@ -1,0 +1,24 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main circular background -->
+  <circle cx="32" cy="32" r="26" fill="#8FBC8F" stroke="#F0F0F0" stroke-width="4"/>
+  
+  <!-- Tree/branch icon -->
+  <g transform="translate(32,32)">
+    <!-- Main trunk -->
+    <path d="M0,-12 L0,8" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    <!-- Left branch -->
+    <path d="M0,-4 L-6,-8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Right branch -->
+    <path d="M0,-4 L6,-8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Left sub-branch -->
+    <path d="M-6,-8 L-10,-12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <!-- Right sub-branch -->
+    <path d="M6,-8 L10,-12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Location pin -->
+  <g transform="translate(45,19)">
+    <circle cx="0" cy="0" r="8" fill="white" stroke="#8FBC8F" stroke-width="2"/>
+    <circle cx="0" cy="0" r="3" fill="#8FBC8F"/>
+  </g>
+</svg>

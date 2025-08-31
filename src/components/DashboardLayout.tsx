@@ -4,7 +4,7 @@ import { useNotifications } from "@/context/NotificationContext";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Bell, User, Settings } from "lucide-react";
-import { GraduationHat } from "@/components/ui/graduation-hat";
+import { Logo } from "@/components/ui/logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,7 +39,7 @@ const DashboardLayout = ({ children, title, subtitle }: DashboardLayoutProps) =>
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="bg-lime rounded-lg p-2 shadow-button">
-              <GraduationHat className="w-5 h-5 text-purple-dark" />
+              <Logo className="w-5 h-5" size={20} />
             </div>
             <span className="text-2xl font-bold text-white">Placement Tracker</span>
           </div>

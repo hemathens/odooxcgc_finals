@@ -16,6 +16,7 @@ import CompanyDashboard from "./pages/CompanyDashboard";
 import ResumeBuilder from "./pages/ResumeBuilder";
 import ApplicationTracker from "./pages/ApplicationTracker";
 import TestScheduler from "./pages/TestScheduler";
+import AIChatBot from "./components/AIChatBot";
 import StudentManagement from "./pages/StudentManagement";
 import CompanyManagement from "./pages/CompanyManagement";
 import PlacementReports from "./pages/PlacementReports";
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/resume-builder" element={<ProtectedRoute roles={["student"]}><ResumeBuilder /></ProtectedRoute>} />
               <Route path="/application-tracker" element={<ProtectedRoute roles={["student"]}><ApplicationTracker /></ProtectedRoute>} />
               <Route path="/test-scheduler" element={<ProtectedRoute roles={["student"]}><TestScheduler /></ProtectedRoute>} />
+              <Route path="/ai-chatbot" element={<ProtectedRoute roles={["student"]}><AIChatBot /></ProtectedRoute>} />
               <Route path="/tests/new" element={<ProtectedRoute roles={["student"]}><CreateTest /></ProtectedRoute>} />
               
               {/* Profile & Settings Routes */}

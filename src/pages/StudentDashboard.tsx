@@ -38,16 +38,10 @@ const StudentDashboard = () => {
     // Simulate initial loading experience
     const loadDashboardData = async () => {
       setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       setProfileCompletion(75);
       setIsLoading(false);
-      
-      // Welcome toast
-      toast({
-        title: "Welcome back!",
-        description: "Your dashboard has been updated with the latest information.",
-      });
     };
 
     loadDashboardData();

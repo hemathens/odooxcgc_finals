@@ -49,14 +49,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem('access_token');
-      if (token) {
+      const storedUser = localStorage.getItem('user');
+      
+      if (token && storedUser) {
         try {
+          // First try to use stored user data for immediate UI update
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          
+          // Then validate token with server in background
           const userData = await apiClient.getCurrentUser();
           setUser(userData as User);
         } catch (error) {
           // Token is invalid, clear it
           localStorage.removeItem('access_token');
           localStorage.removeItem('user');
+          setUser(null);
         }
       }
       setLoading(false);

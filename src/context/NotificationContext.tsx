@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { API_BASE_URL } from '@/lib/config';
 
 export interface Notification {
   id: string;
@@ -35,71 +36,92 @@ interface NotificationProviderProps {
 }
 
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
-  const [notifications, setNotifications] = useState<Notification[]>(() => {
-    // Load notifications from localStorage on initialization
-    const savedNotifications = localStorage.getItem('notifications');
-    if (savedNotifications) {
-      try {
-        return JSON.parse(savedNotifications);
-      } catch (error) {
-        console.error('Error parsing saved notifications:', error);
-      }
-    }
-    
-    // Default notifications if nothing is saved
-    return [
-      {
-        id: '1',
-        type: 'job',
-        title: 'New Job Opportunity',
-        message: 'A new Software Engineer position at Google has been posted that matches your profile.',
-        timestamp: '2 hours ago',
-        read: false,
-        priority: 'high'
-      },
-      {
-        id: '2',
-        type: 'interview',
-        title: 'Interview Scheduled',
-        message: 'Your interview with Microsoft has been scheduled for tomorrow at 2:00 PM.',
-        timestamp: '1 day ago',
-        read: false,
-        priority: 'high'
-      },
-      {
-        id: '3',
-        type: 'application',
-        title: 'Application Status Update',
-        message: 'Your application at Amazon has moved to the next round.',
-        timestamp: '2 days ago',
-        read: true,
-        priority: 'medium'
-      },
-      {
-        id: '4',
-        type: 'reminder',
-        title: 'Resume Update Reminder',
-        message: 'It\'s been 3 months since you last updated your resume. Consider adding new skills and experiences.',
-        timestamp: '3 days ago',
-        read: true,
-        priority: 'low'
-      },
-      {
-        id: '5',
-        type: 'system',
-        title: 'Welcome to Placement Tracker',
-        message: 'Thank you for joining Placement Tracker! Complete your profile to get started.',
-        timestamp: '1 week ago',
-        read: true,
-        priority: 'low'
-      }
-    ];
-  });
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Save notifications to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('notifications', JSON.stringify(notifications));
-  }, [notifications]);
+    const loadNotifications = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          // Use fallback data if not authenticated
+          setNotifications([
+            {
+              id: '1',
+              type: 'job',
+              title: 'New Job Opportunity',
+              message: 'A new Software Engineer position at Google has been posted that matches your profile.',
+              timestamp: '2 hours ago',
+              read: false,
+              priority: 'high'
+            },
+            {
+              id: '2',
+              type: 'interview',
+              title: 'Interview Scheduled',
+              message: 'Your interview with Microsoft has been scheduled for tomorrow at 2:00 PM.',
+              timestamp: '1 day ago',
+              read: false,
+              priority: 'high'
+            },
+            {
+              id: '3',
+              type: 'system',
+              title: 'Welcome to Placement Tracker',
+              message: 'Thank you for joining Placement Tracker! Complete your profile to get started.',
+              timestamp: '1 week ago',
+              read: true,
+              priority: 'low'
+            }
+          ]);
+          setIsLoading(false);
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/notifications`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setNotifications(Array.isArray(data) ? data : []);
+        } else {
+          // Use fallback data on API error
+          setNotifications([
+            {
+              id: '1',
+              type: 'system',
+              title: 'Welcome to Placement Tracker',
+              message: 'Thank you for joining! Complete your profile to get started.',
+              timestamp: '1 day ago',
+              read: false,
+              priority: 'medium'
+            }
+          ]);
+        }
+      } catch (error) {
+        console.error('Error loading notifications:', error);
+        // Use fallback data on network error
+        setNotifications([
+          {
+            id: '1',
+            type: 'system',
+            title: 'Welcome to Placement Tracker',
+            message: 'Thank you for joining! Complete your profile to get started.',
+            timestamp: '1 day ago',
+            read: false,
+            priority: 'medium'
+          }
+        ]);
+      }
+      setIsLoading(false);
+    };
+
+    loadNotifications();
+  }, []);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

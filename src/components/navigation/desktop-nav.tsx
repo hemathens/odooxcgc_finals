@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, FileText, Briefcase, Calendar, Users, Building, TrendingUp, Settings, Bell, UserCheck } from "lucide-react";
+import { Home, FileText, Briefcase, Calendar, Users, Building, TrendingUp, Settings, Bell, UserCheck, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
@@ -34,6 +34,12 @@ const navigationConfig: NavItem[] = [
     title: "Tests",
     href: "/test-scheduler",
     icon: Calendar,
+    roles: ["student"]
+  },
+  {
+    title: "AI ChatBot",
+    href: "/ai-chatbot",
+    icon: Bot,
     roles: ["student"]
   },
   

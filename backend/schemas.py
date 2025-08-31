@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
-from models import UserRole, JobCategory, ApplicationStatus
+from models import UserRole, JobCategory, ApplicationStatus, MessageRole
 from datetime import datetime
 
 # User schemas
@@ -97,5 +97,32 @@ class ApplicationResponse(BaseModel):
     offered_package_lpa: Optional[float] = None
     created_at: datetime
 
+    class Config:
+        from_attributes = True
+
+# Chat schemas
+class ChatMessageRequest(BaseModel):
+    content: str
+    conversation_id: Optional[int] = None
+
+class ChatMessageResponse(BaseModel):
+    id: int
+    conversation_id: int
+    role: MessageRole
+    content: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class ChatConversationResponse(BaseModel):
+    id: int
+    user_id: int
+    title: Optional[str] = None
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    messages: List[ChatMessageResponse] = Field(default_factory=list)
+    
     class Config:
         from_attributes = True

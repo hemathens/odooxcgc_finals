@@ -368,16 +368,14 @@ const InterviewManagement = () => {
                       </Select>
 
                       <Button
-                        variant="outline"
-                        className="text-white border-lime hover:bg-lime hover:text-purple-dark"
+                        className="bg-green-500/20 text-green-400 hover:bg-green-500/30"
                       >
                         <Edit2 className="w-4 h-4 mr-2" />
                         Edit
                       </Button>
 
                       <Button
-                        variant="outline"
-                        className="text-white border-border hover:bg-purple-medium"
+                        className="bg-green-500/20 text-green-400 hover:bg-green-500/30"
                       >
                         <MessageSquare className="w-4 h-4 mr-2" />
                         Add Notes

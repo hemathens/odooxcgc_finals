@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, FileText, Briefcase, Calendar, User, Users, Building, TrendingUp } from "lucide-react";
+import { Menu, X, Home, FileText, Briefcase, Calendar, User, Users, Building, TrendingUp, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -41,6 +41,13 @@ const navigationConfig: NavItem[] = [
     href: "/test-scheduler",
     icon: Calendar,
     description: "Book assessment slots",
+    roles: ["student"]
+  },
+  {
+    title: "AI ChatBot",
+    href: "/ai-chatbot",
+    icon: Bot,
+    description: "Get AI assistance",
     roles: ["student"]
   },
   

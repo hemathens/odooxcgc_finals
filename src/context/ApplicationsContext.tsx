@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { API_BASE_URL } from '@/lib/config';
 
 export interface Application {
   id: string;
@@ -32,46 +33,86 @@ export const useApplications = (): ApplicationsContextType => {
 interface ProviderProps { children: ReactNode }
 
 export const ApplicationsProvider: React.FC<ProviderProps> = ({ children }) => {
-  const [applications, setApplications] = useState<Application[]>(() => {
-    const saved = localStorage.getItem('applications');
-    if (saved) {
-      try {
-        return JSON.parse(saved) as Application[];
-      } catch (e) {
-        console.error('Failed to parse saved applications:', e);
-      }
-    }
-    // Seed data if none saved
-    return [
-      {
-        id: '1',
-        company: 'Tech Corp',
-        position: 'Software Engineer',
-        status: 'in-review',
-        appliedDate: '2024-08-25',
-        deadline: '2024-09-01'
-      },
-      {
-        id: '2',
-        company: 'StartupXYZ',
-        position: 'Frontend Developer',
-        status: 'interview',
-        appliedDate: '2024-08-20'
-      },
-      {
-        id: '3',
-        company: 'BigTech Inc',
-        position: 'Full Stack Developer',
-        status: 'applied',
-        appliedDate: '2024-08-28',
-        deadline: '2024-09-05'
-      }
-    ];
-  });
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem('applications', JSON.stringify(applications));
-  }, [applications]);
+    const loadApplications = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          // Use fallback data if not authenticated
+          setApplications([
+            {
+              id: '1',
+              company: 'Tech Corp',
+              position: 'Software Engineer',
+              status: 'in-review',
+              appliedDate: '2024-08-25',
+              deadline: '2024-09-01'
+            },
+            {
+              id: '2',
+              company: 'StartupXYZ',
+              position: 'Frontend Developer',
+              status: 'interview',
+              appliedDate: '2024-08-20'
+            },
+            {
+              id: '3',
+              company: 'BigTech Inc',
+              position: 'Full Stack Developer',
+              status: 'applied',
+              appliedDate: '2024-08-28',
+              deadline: '2024-09-05'
+            }
+          ]);
+          setIsLoading(false);
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/applications/my`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setApplications(data || []);
+        } else {
+          // Use fallback data on API error
+          setApplications([
+            {
+              id: '1',
+              company: 'Demo Company',
+              position: 'Software Engineer',
+              status: 'in-review',
+              appliedDate: '2024-08-25',
+              deadline: '2024-09-01'
+            }
+          ]);
+        }
+      } catch (error) {
+        console.error('Error loading applications:', error);
+        // Use fallback data on network error
+        setApplications([
+          {
+            id: '1',
+            company: 'Demo Company',
+            position: 'Software Engineer',
+            status: 'in-review',
+            appliedDate: '2024-08-25',
+            deadline: '2024-09-01'
+          }
+        ]);
+      }
+      setIsLoading(false);
+    };
+
+    loadApplications();
+  }, []);
 
   const addApplication: ApplicationsContextType['addApplication'] = (app) => {
     const newApp: Application = { id: Date.now().toString(), ...app };

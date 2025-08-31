@@ -37,12 +37,12 @@ interface AuthResponse {
   user: User;
 }
 
-const API_BASE_URL = 'http://localhost:8000';
+import { API_ORIGIN } from '@/lib/config';
 
 class ApiClient {
   private baseUrl: string;
 
-  constructor(baseUrl: string = API_BASE_URL) {
+  constructor(baseUrl: string = API_ORIGIN) {
     this.baseUrl = baseUrl;
   }
 
@@ -68,6 +68,14 @@ class ApiClient {
       console.log('API Response:', { status: response.status, statusText: response.statusText });
 
       if (!response.ok) {
+        // Handle 401 Unauthorized - token expired
+        if (response.status === 401) {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+          throw new Error('Session expired. Please login again.');
+        }
+        
         const errorText = await response.text();
         console.error('API Error Response:', errorText);
         let errorData;
@@ -85,7 +93,7 @@ class ApiClient {
     } catch (error) {
       console.error('API Request Failed:', error);
       if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error('Cannot connect to backend server. Make sure it\'s running on http://localhost:8000');
+        throw new Error(`Cannot connect to backend server. Make sure it's running on ${API_ORIGIN}`);
       }
       throw error;
     }
@@ -130,7 +138,7 @@ class ApiClient {
 
   // Application endpoints
   async getApplications(): Promise<any[]> {
-    return this.request('/api/applications');
+    return this.request('/api/applications/my');
   }
 
   // Test endpoints
@@ -144,4 +152,4 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient(API_BASE_URL);
+export const apiClient = new ApiClient(API_ORIGIN);

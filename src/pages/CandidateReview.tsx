@@ -318,16 +318,14 @@ const CandidateReview = () => {
 
                       <Button
                         onClick={() => handleDownloadResume(candidate)}
-                        variant="outline"
-                        className="text-white border-lime hover:bg-lime hover:text-purple-dark"
+                        className="bg-green-500/20 text-green-400 hover:bg-green-500/30"
                       >
                         <FileText className="w-4 h-4 mr-2" />
                         View Resume
                       </Button>
 
                       <Button
-                        variant="outline"
-                        className="text-white border-border hover:bg-purple-medium"
+                        className="bg-green-500/20 text-green-400 hover:bg-green-500/30"
                       >
                         <Eye className="w-4 h-4 mr-2" />
                         View Profile

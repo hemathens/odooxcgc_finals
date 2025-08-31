@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { API_BASE_URL } from '@/lib/config';
 
 export interface Test {
   id: string;
@@ -49,87 +50,99 @@ export const useTests = () => {
 interface TestsProviderProps { children: ReactNode }
 
 export const TestsProvider: React.FC<TestsProviderProps> = ({ children }) => {
-  const [tests, setTests] = useState<Test[]>(() => {
-    const saved = localStorage.getItem('tests');
-    if (saved) {
-      try {
-        return JSON.parse(saved) as Test[];
-      } catch (e) {
-        console.error('Failed to parse saved tests:', e);
-      }
-    }
-    // Seed data (only on first load if none saved)
-    return [
-      {
-        id: '1',
-        company: 'Tech Corp',
-        position: 'Software Engineer',
-        type: 'technical',
-        date: '2024-09-02',
-        time: '10:00',
-        duration: 120,
-        location: 'Online',
-        meetingLink: 'https://meet.google.com/abc-def-ghi',
-        status: 'scheduled',
-        instructions: 'Prepare for system design and coding questions',
-        reminderSet: true
-      },
-      {
-        id: '2',
-        company: 'StartupXYZ',
-        position: 'Frontend Developer',
-        type: 'coding',
-        date: '2024-09-03',
-        time: '14:00',
-        duration: 90,
-        location: 'Online',
-        meetingLink: 'https://codepair.com/session/xyz123',
-        status: 'scheduled',
-        instructions: 'React and JavaScript focused assessment',
-        reminderSet: false
-      },
-      {
-        id: '3',
-        company: 'BigTech Inc',
-        position: 'Full Stack Developer',
-        type: 'interview',
-        date: '2024-09-05',
-        time: '11:30',
-        duration: 60,
-        location: 'Office - Building A, Floor 3',
-        status: 'scheduled',
-        reminderSet: true
-      },
-      {
-        id: '4',
-        company: 'InnovateLabs',
-        position: 'Backend Engineer',
-        type: 'aptitude',
-        date: '2024-08-28',
-        time: '09:00',
-        duration: 60,
-        location: 'Online',
-        status: 'completed',
-        reminderSet: false
-      },
-      {
-        id: '5',
-        company: 'DataCorp',
-        position: 'Data Analyst',
-        type: 'technical',
-        date: '2024-08-25',
-        time: '15:00',
-        duration: 90,
-        location: 'Online',
-        status: 'missed',
-        reminderSet: true
-      }
-    ];
-  });
+  const [tests, setTests] = useState<Test[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem('tests', JSON.stringify(tests));
-  }, [tests]);
+    const loadTests = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          // Use fallback data if not authenticated
+          setTests([
+            {
+              id: '1',
+              company: 'Tech Corp',
+              position: 'Software Engineer',
+              type: 'technical',
+              date: '2024-09-02',
+              time: '10:00',
+              duration: 120,
+              location: 'Online',
+              meetingLink: 'https://meet.google.com/abc-def-ghi',
+              status: 'scheduled',
+              instructions: 'Prepare for system design and coding questions',
+              reminderSet: true
+            },
+            {
+              id: '2',
+              company: 'StartupXYZ',
+              position: 'Frontend Developer',
+              type: 'coding',
+              date: '2024-09-03',
+              time: '14:00',
+              duration: 90,
+              location: 'Online',
+              meetingLink: 'https://codepair.com/session/xyz123',
+              status: 'scheduled',
+              instructions: 'React and JavaScript focused assessment',
+              reminderSet: false
+            }
+          ]);
+          setIsLoading(false);
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/tests`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setTests(Array.isArray(data) ? data : []);
+        } else {
+          // Use fallback data on API error
+          setTests([
+            {
+              id: '1',
+              company: 'Demo Company',
+              position: 'Software Engineer',
+              type: 'technical',
+              date: '2024-09-02',
+              time: '10:00',
+              duration: 120,
+              location: 'Online',
+              status: 'scheduled',
+              reminderSet: true
+            }
+          ]);
+        }
+      } catch (error) {
+        console.error('Error loading tests:', error);
+        // Use fallback data on network error
+        setTests([
+          {
+            id: '1',
+            company: 'Demo Company',
+            position: 'Software Engineer',
+            type: 'technical',
+            date: '2024-09-02',
+            time: '10:00',
+            duration: 120,
+            location: 'Online',
+            status: 'scheduled',
+            reminderSet: true
+          }
+        ]);
+      }
+      setIsLoading(false);
+    };
+
+    loadTests();
+  }, []);
 
   const addTest: TestsContextType['addTest'] = (input) => {
     const newTest: Test = {

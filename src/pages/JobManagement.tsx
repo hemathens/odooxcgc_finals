@@ -156,6 +156,24 @@ const JobManagement = () => {
     }
   };
 
+  const deleteJob = (jobId: string) => {
+    setJobs(jobs.filter(job => job.id !== jobId));
+    toast({
+      title: "Job Deleted",
+      description: "Job posting has been deleted successfully.",
+    });
+  };
+
+  const viewJobDetails = (jobId: string) => {
+    const job = jobs.find(j => j.id === jobId);
+    if (job) {
+      toast({
+        title: job.title,
+        description: `${job.department} • ${job.location} • ${job.applicants} applicants`,
+      });
+    }
+  };
+
   const stats = {
     total: jobs.length,
     published: jobs.filter(j => j.status === 'published').length,
@@ -323,7 +341,11 @@ const JobManagement = () => {
 
                   <div className="flex flex-col gap-3 xl:min-w-64">
                     <div className="flex gap-2">
-                      <Button size="sm" className="btn-secondary flex-1">
+                      <Button 
+                        size="sm" 
+                        onClick={() => viewJobDetails(job.id)}
+                        className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 flex-1"
+                      >
                         <Eye className="w-4 h-4 mr-2" />
                         View Details
                       </Button>
@@ -341,7 +363,11 @@ const JobManagement = () => {
                         <Copy className="w-4 h-4 mr-1" />
                         Duplicate
                       </Button>
-                      <Button size="sm" variant="ghost" className="text-red-400 hover:bg-red-500/20">
+                      <Button 
+                        size="sm" 
+                        onClick={() => deleteJob(job.id)}
+                        className="bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>

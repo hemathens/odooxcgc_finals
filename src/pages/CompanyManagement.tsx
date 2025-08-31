@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { GraduationHat } from "@/components/ui/graduation-hat";
 import { useToast } from "@/hooks/use-toast";
+import { API_BASE_URL } from "@/lib/config";
 
 interface Company {
   id: string;
@@ -54,28 +55,79 @@ const statusOptions = [
 
 const CompanyManagement = () => {
   const { toast } = useToast();
-  const [companies, setCompanies] = useState<Company[]>(() => {
-    try {
-      const saved = localStorage.getItem('companies');
-      return saved ? JSON.parse(saved) as Company[] : [];
-    } catch {
-      return [];
-    }
-  });
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
-
   useEffect(() => {
-    localStorage.setItem('companies', JSON.stringify(companies));
-  }, [companies]);
+    const loadCompanies = async () => {
+      setIsLoading(true);
+      try {
+        const token = localStorage.getItem('access_token');
+        const response = await fetch(`${API_BASE_URL}/users?role=company`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const companiesData = await response.json();
+        
+        // Handle empty response
+        if (!Array.isArray(companiesData)) {
+          console.warn('Companies data is not an array:', companiesData);
+          setCompanies([]);
+          setFilteredCompanies([]);
+          setIsLoading(false);
+          return;
+        }
 
-  useEffect(() => {
-    setFilteredCompanies(companies);
-  }, [companies]);
+        const formattedCompanies: Company[] = companiesData.map((company: any) => ({
+          id: company.id.toString(),
+          name: company.company_name || company.name || 'Unknown Company',
+          email: company.email || 'contact@company.com',
+          website: `https://${(company.company_name || 'company').toLowerCase().replace(/\s+/g, '')}.com`,
+          location: 'India',
+          industry: 'Technology',
+          size: 'Medium (100-500)',
+          status: company.is_active ? 'active' : 'inactive' as 'pending' | 'approved' | 'active' | 'suspended' | 'blacklisted',
+          registrationDate: company.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+          lastActivity: new Date().toISOString().split('T')[0],
+          jobPostings: Math.floor(Math.random() * 20) + 5,
+          totalApplications: Math.floor(Math.random() * 100) + 20,
+          hires: Math.floor(Math.random() * 50) + 10,
+          contactPerson: {
+            name: company.name || 'Unknown Contact',
+            designation: 'HR Manager',
+            email: company.email || 'hr@company.com',
+            phone: '+91 9876543210'
+          }
+        }));
+        
+        setCompanies(formattedCompanies);
+        setFilteredCompanies(formattedCompanies);
+      } catch (error) {
+        console.error('Error loading companies:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load company data. Please try again.",
+          variant: "destructive"
+        });
+        setCompanies([]);
+        setFilteredCompanies([]);
+      }
+      setIsLoading(false);
+    };
+
+    loadCompanies();
+  }, []);
 
   useEffect(() => {
     let filtered = companies;
@@ -120,6 +172,13 @@ const CompanyManagement = () => {
     toast({
       title: "Status Updated",
       description: "Company status has been updated successfully.",
+    });
+  };
+
+  const viewCompanyDetails = (company: Company) => {
+    toast({
+      title: company.name,
+      description: `${company.industry} • ${company.location} • ${company.jobPostings} job posts`,
     });
   };
 
@@ -289,7 +348,11 @@ const CompanyManagement = () => {
 
                   <div className="flex flex-col gap-3 xl:min-w-64">
                     <div className="flex gap-2">
-                      <Button size="sm" className="btn-secondary flex-1">
+                      <Button 
+                        size="sm" 
+                        onClick={() => viewCompanyDetails(company)}
+                        className="bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 flex-1"
+                      >
                         <Eye className="w-4 h-4 mr-2" />
                         View Details
                       </Button>
@@ -381,26 +444,53 @@ function CompanyCreateForm({ onCancel, onCreate }: { onCancel: () => void; onCre
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !location || !industry || !size) return;
-    const company: Company = {
-      id: Date.now().toString(),
-      name,
-      email: email.trim().toLowerCase(),
-      website,
-      location,
-      industry,
-      size,
-      status: 'pending',
-      registrationDate: new Date().toISOString().split('T')[0],
-      lastActivity: new Date().toISOString().split('T')[0],
-      jobPostings: 0,
-      totalApplications: 0,
-      hires: 0,
-      contactPerson: { name: contactName, designation: contactDesignation, email: contactEmail, phone: contactPhone }
-    };
-    onCreate(company);
+    
+    try {
+      // Create company via API
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: contactName || name,
+          email: email.trim().toLowerCase(),
+          password: 'temp123', // Temporary password
+          role: 'company',
+          company_name: name
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create company');
+      }
+
+      const result = await response.json();
+      
+      const company: Company = {
+        id: result.user.id.toString(),
+        name,
+        email: email.trim().toLowerCase(),
+        website,
+        location,
+        industry,
+        size,
+        status: 'pending',
+        registrationDate: new Date().toISOString().split('T')[0],
+        lastActivity: new Date().toISOString().split('T')[0],
+        jobPostings: 0,
+        totalApplications: 0,
+        hires: 0,
+        contactPerson: { name: contactName, designation: contactDesignation, email: contactEmail, phone: contactPhone }
+      };
+      onCreate(company);
+    } catch (error) {
+      console.error('Error creating company:', error);
+      // Don't create fallback company on error
+    }
   };
 
   return (
