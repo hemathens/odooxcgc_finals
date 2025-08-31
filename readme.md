@@ -2,6 +2,8 @@
 
 **Team Name: Drakshushi**
 
+**Drive Video Link:** [https://drive.google.com/file/d/1UQGnh076otfvXeezGj4YknFd-HVcezZj/view?usp=sharing](https://drive.google.com/file/d/1UQGnh076otfvXeezGj4YknFd-HVcezZj/view?usp=sharing)
+
 # Placement Preparation Tracker
 
 _A Final Round Submission for ODOO X CGC Mohali Hackathon_
